@@ -1,0 +1,148 @@
+#! /usr/bin/env bash
+# Usage: octoplus project <project-name> 
+# Summary: creates a new project <project-name> in the current directory
+# Help: This command is useful to create usual structure for simple C++ Autotools projects
+
+email="my-own-email@my-domain"
+
+CURDIR=$(pwd)
+newmaint_dir=$HOME/dist
+tempdir=$(mktemp -d /tmp/automess_eng_XXXXXXXX)
+
+test -d $newmaint_dir|| mkdir -p $newmaint_dir
+
+usage(){
+	echo "Usage:"
+	echo ""
+	echo "$0 <project-name> # C++ program"
+}
+
+read_env(){ 
+	if [ "x$AUTOMESS_EMAIL" = "x" ]; then 
+		if [ -f $HOME/.automess.rc ]; then
+			source $HOME/.automess.rc
+		else 
+			echo   "insert email:"
+			read   AUTOMESS_EMAIL
+			echo  "#! /bin/sh" > $HOME/.automess.rc
+			echo  "AUTOMESS_EMAIL=$AUTOMESS_EMAIL" >> $HOME/.automess.rc
+			echo  "export AUTOMESS_EMAIL" >> $HOME/.automess.rc
+			export AUTOMESS_EMAIL
+		fi
+	fi
+	email=$AUTOMESS_EMAIL
+}
+
+long_description=""
+short_description=""
+collect_inputs(){
+	echo "Insert a single line description"
+	read short_description
+	echo "Insert a long description"
+	read long_description
+}
+
+if [ "$#" -lt 1 ]; then
+	usage
+	exit -1
+else
+	read_env
+	if [ $1 = "help" ]; then
+		usage
+		exit
+	fi
+	project=$1
+fi
+
+function c_process()
+{
+mkdir src 
+mkdir doc 
+mkdir etc 
+cat<<__EOL__ >src/$project.cpp
+#include<iostream>
+#include "Zero.h"
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+    Zero zero;
+    return 0;
+}
+__EOL__
+
+CLASS_NAME="Zero"
+upperClass=$(echo "$CLASS_NAME" | tr '[:lower:]' '[:upper:]')
+    
+cat<<__EOD__>./src/${CLASS_NAME}.cpp
+#include "${CLASS_NAME}.h"
+bool ${CLASS_NAME}::setX(double xval)
+{
+    x = xval;
+}
+double Zero::getX()
+{
+    return x;
+}
+__EOD__
+
+        cat<<__EOD__>./src/${CLASS_NAME}.h
+#ifndef ${upperClass}_H
+#define ${upperClass}_H
+
+class ${CLASS_NAME}
+{
+    private:
+        double x;
+    public:
+        bool setX(double xval);
+	double getX();
+};
+
+#endif
+__EOD__
+
+################################
+
+cat<<__EOL__ >bootstrap.sh
+#! /bin/sh 
+aclocal && automake -a -c && autoconf
+__EOL__
+
+chmod 755 bootstrap.sh
+
+echo "SUBDIRS = src doc #etc"> Makefile.am
+
+echo $project"confdir=\$(sysconfdir)/"$project>./etc/Makefile.am
+echo $project"conf_DATA = $project.conf">>./etc/Makefile.am
+echo $project"logdir = \$(localstatedir)/log/"$project>>./etc/Makefile.am
+
+echo "# Example $project.conf">./etc/$project".conf"
+
+echo "docdir = \$(datadir)/doc/@PACKAGE@" > ./doc/Makefile.am
+echo "doc_DATA = README" >> ./doc/Makefile.am
+echo "" >> ./doc/README
+
+echo "bin_PROGRAMS = $project "> ./src/Makefile.am
+echo $project"_SOURCES = $project.cpp Zero.cpp Zero.h #Add more here">>./src/Makefile.am
+
+cat <<__EOL__ >configure.ac
+AC_INIT([$project], [0.1], [$email], [$project])
+AC_CONFIG_SRCDIR([src/$project.cpp])
+AM_INIT_AUTOMAKE(foreign)
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_INSTALL
+AC_CONFIG_FILES([Makefile src/Makefile doc/Makefile])
+AC_OUTPUT
+__EOL__
+}
+
+########################
+# Main block
+########################
+
+mkdir $project
+cd $project
+c_process
+echo "Done"

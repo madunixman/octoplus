@@ -1,0 +1,10 @@
+Package: octoplus
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: all
+Depends: 
+Maintainer: Paolo Lulli <paolo@lulli.net>
+Description: C++ file creation helper
+ run this from the commandline when you need to
+ generate C++ projects or add new classes

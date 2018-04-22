@@ -1,0 +1,44 @@
+#! /usr/bin/env bash
+# Usage: octoplus class <class-name> 
+# Summary: creates a new class <class-name> in the current directory
+# Help: This command is useful to create usual ant structure for simple batch projects
+
+if [ $# -ne 1 ]; then
+	echo "Bad param numbers: see manual"
+	exit;
+else
+    echo "OK"
+    CLASS_NAME=$1
+    upperClass=$(echo "$CLASS_NAME" | tr '[:lower:]' '[:upper:]')
+    test -f ${CLASS_NAME}.cpp && exit -1
+    test -f ${CLASS_NAME}.h && exit -1
+	
+    cat<<__EOD__>${CLASS_NAME}.cpp
+#include "${CLASS_NAME}.h"
+bool ${CLASS_NAME}::setX(double xval)
+{
+    x = xval;
+}
+/**
+int main(int argc, char **argv)
+{
+}
+*/
+__EOD__
+
+	cat<<__EOD__>${CLASS_NAME}.h
+#ifndef ${upperClass}_H
+#define ${upperClass}_H
+
+class ${CLASS_NAME}
+{
+    private:
+        double x;
+    public:
+        bool setX(double xval);
+};
+
+#endif
+__EOD__
+
+fi
