@@ -1,6 +1,6 @@
 # Octoplus
 
-Utility to create autotools scaffolding for C++ projects
+Commandline utility to create scaffolding for C++ projects that use using autoconf/automake.
 
 ```
 Usage: octoplus <command> [<args>]
