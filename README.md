@@ -1,4 +1,4 @@
-#octoplus
+# Octoplus
 
 Utility to create autotools scaffolding for C++ projects
 
