@@ -12,3 +12,6 @@ Some useful octoplus commands are:
 
 See 'octoplus help <command>' for information on a specific command.
 ```
+
+
+Copyright (c) 2018 Paolo Lulli
