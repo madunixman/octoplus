@@ -2,6 +2,7 @@
 
 Utility to create autotools scaffolding for C++ projects
 
+```
 Usage: octoplus <command> [<args>]
 
 Some useful octoplus commands are:
@@ -10,3 +11,4 @@ Some useful octoplus commands are:
    project   creates a new project <project-name> in the current directory
 
 See 'octoplus help <command>' for information on a specific command.
+```
